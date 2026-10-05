@@ -1,0 +1,486 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Diesel N Steel Fare Calculator</title>
+<style>
+  :root{
+    --yellow:#ffc400;
+    --yellow2:#ffdb4d;
+    --black:#0b0b0b;
+    --dark:#171717;
+    --panel:#242424;
+    --panel2:#303030;
+    --line:#454545;
+    --text:#f5f5f5;
+    --muted:#bdbdbd;
+    --green:#39d98a;
+    --red:#ff6262;
+  }
+  *{box-sizing:border-box}
+  body{
+    margin:0;
+    min-height:100vh;
+    font-family:Arial,Helvetica,sans-serif;
+    background:
+      radial-gradient(circle at 15% 10%,rgba(255,196,0,.12),transparent 28%),
+      linear-gradient(135deg,#090909 0%,#191919 55%,#0b0b0b 100%);
+    color:var(--text);
+  }
+  .wrap{width:min(1120px,94%);margin:0 auto;padding:28px 0 45px}
+  header{
+    display:flex;align-items:center;justify-content:space-between;gap:20px;
+    padding:20px 24px;margin-bottom:20px;border:1px solid #3b3b3b;
+    border-radius:18px;background:linear-gradient(135deg,#202020,#111);
+    box-shadow:0 12px 35px rgba(0,0,0,.35);
+  }
+  .brand{display:flex;align-items:center;gap:16px}
+  .logo{
+    font-weight:1000;line-height:.8;letter-spacing:-2px;
+    transform:skew(-6deg);text-shadow:3px 3px 0 #000;
+    font-size:31px;
+  }
+  .logo .diesel{color:#ffbd22}
+  .logo .steel{color:#a8a8a8;display:block;margin-left:22px;font-size:28px}
+  .logo .n{color:#fff;font-size:20px;position:relative;top:-1px;margin-left:7px}
+  h1{margin:0;font-size:26px}
+  .subtitle{margin:5px 0 0;color:var(--muted);font-size:13px}
+  .badge{
+    padding:9px 13px;border:1px solid #5a4700;border-radius:999px;
+    color:#171717;background:var(--yellow);font-weight:800;font-size:12px;
+    white-space:nowrap;
+  }
+  .grid{display:grid;grid-template-columns:1fr 1fr;gap:20px}
+  .card{
+    background:linear-gradient(180deg,#252525,#1a1a1a);
+    border:1px solid #3d3d3d;border-radius:18px;padding:22px;
+    box-shadow:0 10px 30px rgba(0,0,0,.28);
+  }
+  .card h2{font-size:16px;margin:0 0 18px;color:var(--yellow)}
+  .field{margin-bottom:15px}
+  label{display:block;font-size:12px;font-weight:800;color:#d8d8d8;margin-bottom:7px;text-transform:uppercase;letter-spacing:.5px}
+  select,input{
+    width:100%;height:48px;border:1px solid #4a4a4a;border-radius:11px;
+    background:#101010;color:#fff;padding:0 13px;font-size:15px;outline:none;
+  }
+  select:focus,input:focus{border-color:var(--yellow);box-shadow:0 0 0 3px rgba(255,196,0,.12)}
+  .row{display:grid;grid-template-columns:1fr 1fr;gap:12px}
+  .actions{display:flex;gap:10px;margin-top:7px}
+  button{
+    border:0;border-radius:11px;height:48px;padding:0 20px;font-weight:900;
+    cursor:pointer;font-size:14px;
+  }
+  .calculate{flex:1;background:var(--yellow);color:#111}
+  .calculate:hover{background:var(--yellow2)}
+  .reset{background:#333;color:#eee;border:1px solid #4b4b4b}
+  .results{display:grid;grid-template-columns:1fr 1fr;gap:12px;margin-top:16px}
+  .result{
+    padding:16px;border-radius:14px;background:#101010;border:1px solid #393939;
+  }
+  .result .label{margin:0 0 6px;color:#aaa}
+  .money{font-size:28px;font-weight:950}
+  .regular .money{color:#fff}
+  .discount .money{color:var(--yellow)}
+  .summary{
+    margin-top:14px;padding:14px;border-radius:13px;
+    background:#151515;border:1px dashed #555;line-height:1.55;font-size:13px;color:#d5d5d5;
+  }
+  .summary strong{color:#fff}
+  .status{
+    margin-top:12px;padding:11px 13px;border-radius:10px;font-size:13px;font-weight:800;display:none;
+  }
+  .status.good{display:block;color:#9ff0c5;background:rgba(57,217,138,.08);border:1px solid rgba(57,217,138,.3)}
+  .status.bad{display:block;color:#ff9c9c;background:rgba(255,98,98,.08);border:1px solid rgba(255,98,98,.3)}
+  .note{font-size:11px;color:#8f8f8f;margin-top:13px;line-height:1.45}
+  .fare-ref{grid-column:1/-1}
+  details{border:1px solid #3d3d3d;border-radius:15px;background:#1b1b1b;overflow:hidden}
+  summary{cursor:pointer;padding:15px 18px;font-weight:900;color:var(--yellow);list-style:none}
+  summary::-webkit-details-marker{display:none}
+  summary:after{content:"＋";float:right;color:#aaa}
+  details[open] summary:after{content:"−"}
+  .reference{padding:0 18px 18px;display:grid;gap:10px}
+  .ref-route{border:1px solid #383838;border-radius:10px;overflow:hidden}
+  .ref-title{background:#303030;padding:10px 12px;font-weight:900;color:var(--yellow);font-size:13px}
+  .ref-body{padding:10px 12px;color:#ccc;font-size:12px;line-height:1.6}
+  footer{text-align:center;color:#777;font-size:11px;margin-top:18px}
+  @media(max-width:780px){
+    header{align-items:flex-start;flex-direction:column}
+    .grid{grid-template-columns:1fr}
+    .fare-ref{grid-column:auto}
+  }
+  @media(max-width:480px){
+    .row,.results{grid-template-columns:1fr}
+    .wrap{width:94%;padding-top:14px}
+    .card{padding:17px}
+    .logo{font-size:25px}.logo .steel{font-size:23px}
+  }
+</style>
+</head>
+<body>
+<div class="wrap">
+  <header>
+    <div class="brand">
+      <div class="logo"><span class="diesel">DIESEL</span><span class="n">N</span><span class="steel">STEEL</span></div>
+      <div>
+        <h1>Fare Calculator</h1>
+        <p class="subtitle">Roblox Jeepney Simulator • Diesel N Steel</p>
+      </div>
+    </div>
+    <div class="badge">FARE TABLE • SEPT 28</div>
+  </header>
+
+  <main class="grid">
+    <section class="card">
+      <h2>TRIP DETAILS <span style="font-size:11px;color:#aaa;font-weight:600;">• BOTH DIRECTIONS SUPPORTED</span></h2>
+      <div class="field">
+        <label for="route">Route</label>
+        <select id="route"></select>
+      </div>
+
+      <div class="row">
+        <div class="field">
+          <label for="from">From</label>
+          <select id="from"></select>
+        </div>
+        <div class="field">
+          <label for="to">To</label>
+          <select id="to"></select>
+        </div>
+      </div>
+
+      <div class="row">
+        <div class="field">
+          <label for="payment">Payment (₱)</label>
+          <input id="payment" type="number" min="0" step="1" placeholder="100">
+        </div>
+        <div class="field">
+          <label for="passengers">Passengers</label>
+          <input id="passengers" type="number" min="1" step="1" value="1">
+        </div>
+      </div>
+
+      <div class="actions">
+        <button class="calculate" id="calculate">CALCULATE FARE</button>
+        <button class="reset" id="reset">RESET</button>
+      </div>
+
+      <div class="status" id="status"></div>
+      <div class="summary" id="summary">Select a route, origin, destination, payment, and passenger count.</div>
+      <div class="note">Regular and discounted amounts are calculated separately. Discounted means the second fare value shown in the supplied fare table.</div>
+    </section>
+
+    <section class="card">
+      <h2>CHANGE</h2>
+      <div class="results">
+        <div class="result regular">
+          <div class="label">REGULAR CHANGE</div>
+          <div class="money" id="regularChange">₱0.00</div>
+        </div>
+        <div class="result discount">
+          <div class="label">DISCOUNTED CHANGE</div>
+          <div class="money" id="discountChange">₱0.00</div>
+        </div>
+      </div>
+
+      <div class="summary">
+        <div><strong>Fare / passenger:</strong> <span id="farePerPassenger">—</span></div>
+        <div><strong>Total regular fare:</strong> <span id="regularTotal">—</span></div>
+        <div><strong>Total discounted fare:</strong> <span id="discountTotal">—</span></div>
+        <div><strong>Payment:</strong> <span id="paymentShown">—</span></div>
+      </div>
+    </section>
+
+    <section class="fare-ref">
+      <details>
+        <summary>VIEW FARE TABLE REFERENCE</summary>
+        <div class="reference" id="reference"></div>
+      </details>
+    </section>
+  </main>
+
+  <footer>Diesel N Steel Fare Calculator • BY YEONGIII</footer>
+</div>
+
+<script>
+// Fare table. Each route lists its stops in travel order and prices only the
+// upper triangle: a stop is priced against the stops that come after it.
+// A fare is the same both ways, so the reverse half of the matrix is mirrored
+// in automatically further down. Prices are [regular, discounted] in pesos.
+const routeData = {
+  "Malolos Line": {
+    stops: ["STO ROSARIO/SAN JUAN", "ATLAG", "BAGNA", "PANASAHAN", "MATIMBO", "MAMBOG", "PITPITAN", "SAN NICOLAS", "MAYSANTOL", "SAN JOSE"],
+    fareTable: {
+      
+      "STO ROSARIO/SAN JUAN": {"SAN JOSE": [26, 22]},
+      "ATLAG": {"STO ROSARIO/SAN JUAN": [24, 22], "SAN JOSE": [24, 22]},
+      "BAGNA": {"ATLAG": [14, 12], "STO ROSARIO/SAN JUAN": [22, 20], "SAN JOSE": [22, 20]},
+      "PANASAHAN": {"BAGNA": [14, 12], "ATLAG": [14, 12], "STO ROSARIO/SAN JUAN": [20, 18], "SAN JOSE": [20, 18]},
+      "MATIMBO": {"PANASAHAN": [14, 12], "BAGNA": [14, 12], "ATLAG": [14, 12], "STO ROSARIO/SAN JUAN": [16, 14], "SAN JOSE": [18, 16]},
+      "MAMBOG": {"MATIMBO": [14, 12], "PANASAHAN": [14, 12], "BAGNA": [14, 12], "ATLAG": [16, 14], "STO ROSARIO/SAN JUAN": [18, 16], "SAN JOSE": [16, 14]},
+      "PITPITAN": {"MAMBOG": [14, 12], "MATIMBO": [14, 12], "PANASAHAN": [14, 12], "BAGNA": [16, 14], "ATLAG": [18, 16], "STO ROSARIO/SAN JUAN": [20, 18], "SAN JOSE": [14, 12]},
+      "SAN NICOLAS": {"PITPITAN": [14, 12], "MAMBOG": [14, 12], "MATIMBO": [14, 12], "PANASAHAN": [16, 14], "BAGNA": [18, 16], "ATLAG": [20, 18], "STO ROSARIO/SAN JUAN": [22, 20], "SAN JOSE": [14, 12]},
+      "MAYSANTOL": {"SAN NICOLAS": [14, 12], "PITPITAN": [14, 12], "MAMBOG": [14, 12], "MATIMBO": [16, 14], "PANASAHAN": [18, 16], "BAGNA": [20, 18], "ATLAG": [22, 20], "STO ROSARIO/SAN JUAN": [24, 22], "SAN JOSE": [14, 12]},
+      "SAN JOSE": {}
+    }
+  },
+  "Balagtas Line": {
+    stops: ["PANGINAY", "MATUNGAO", "WAWA", "BAGUMBAYAN / SN JOSE", "SN JOSE"],
+    fareTable: {
+      "PANGINAY": {"MATUNGAO": [14, 12], "WAWA": [14, 12], "BAGUMBAYAN / SN JOSE": [14, 12], "SN JOSE": [14, 12]},
+      "MATUNGAO": {"WAWA": [14, 12], "BAGUMBAYAN / SN JOSE": [14, 12], "SN JOSE": [14, 12]},
+      "WAWA": {"BAGUMBAYAN / SN JOSE": [16, 14], "SN JOSE": [16, 14]},
+      "BAGUMBAYAN / SN JOSE": {},
+      "SN JOSE": {}
+    }
+  },
+  "Guiguinto Line": {
+    stops: ["TUKTUKAN CRUZ", "MATUNGAO", "BAYAN", "BAGUMBAYAN / SN JOSE", "GUIGUINTO", "SN JOSE"],
+    fareTable: {
+      "TUKTUKAN CRUZ": {"MATUNGAO": [14, 12], "GUIGUINTO": [14, 12], "SN JOSE": [14, 12]},
+      "MATUNGAO": {"BAYAN": [14, 12], "BAGUMBAYAN / SN JOSE": [14, 12], "GUIGUINTO": [14, 12], "SN JOSE": [14, 12]},
+      "BAYAN": {"SN JOSE": [14, 12]},
+      "BAGUMBAYAN / SN JOSE": {"GUIGUINTO": [14, 12]},
+      "GUIGUINTO": {},
+      "SN JOSE": {}
+    }
+  }
+};
+
+// FIXED: Build the fare matrix from EVERY fareTable entry.
+// The supplied fare table is not consistently stored as an upper triangle:
+// some rows contain fares to earlier stops. We therefore read every listed
+// pair and mirror it, making both directions work (A -> B and B -> A).
+const fares = {};
+
+Object.entries(routeData).forEach(([route, def]) => {
+  const matrix = fares[route] = {};
+
+  // Create every stop as a selectable origin.
+  def.stops.forEach(stop => {
+    matrix[stop] = {};
+  });
+
+  // Read every explicitly supplied fare pair.
+  Object.entries(def.fareTable).forEach(([from, destinations]) => {
+    if (!matrix[from]) matrix[from] = {};
+
+    Object.entries(destinations).forEach(([rawTo, fare]) => {
+      // Handle minor spelling/abbreviation differences in the supplied table.
+      const aliases = {
+        "SN JOSE": "SAN JOSE",
+        "AT LAG": "ATLAG"
+      };
+      const to = aliases[rawTo] || rawTo;
+
+      if (!matrix[to]) matrix[to] = {};
+
+      // Store both directions.
+      matrix[from][to] = fare;
+      matrix[to][from] = fare;
+    });
+  });
+});
+
+const routeEl = document.getElementById('route');
+const fromEl = document.getElementById('from');
+const toEl = document.getElementById('to');
+const paymentEl = document.getElementById('payment');
+const passengersEl = document.getElementById('passengers');
+
+const regularChangeEl = document.getElementById('regularChange');
+const discountChangeEl = document.getElementById('discountChange');
+const farePerPassengerEl = document.getElementById('farePerPassenger');
+const regularTotalEl = document.getElementById('regularTotal');
+const discountTotalEl = document.getElementById('discountTotal');
+const paymentShownEl = document.getElementById('paymentShown');
+const summaryEl = document.getElementById('summary');
+const statusEl = document.getElementById('status');
+
+const peso = n => `₱${Number(n).toFixed(2)}`;
+
+function routeStops(route) {
+  return Object.keys(fares[route]);
+}
+
+function fillSelect(el, values, placeholder) {
+  el.innerHTML = '';
+  if (placeholder) {
+    const p = document.createElement('option');
+    p.value = '';
+    p.textContent = placeholder;
+    el.appendChild(p);
+  }
+  values.forEach(v => {
+    const o = document.createElement('option');
+    o.value = v;
+    o.textContent = v;
+    el.appendChild(o);
+  });
+}
+
+function populateRoutes() {
+  Object.keys(fares).forEach(route => {
+    const o = document.createElement('option');
+    o.value = route;
+    o.textContent = route;
+    routeEl.appendChild(o);
+  });
+  populateStops();
+}
+
+function populateStops() {
+  const route = routeEl.value;
+  const stops = routeStops(route);
+  fillSelect(fromEl, stops, 'Select origin');
+  fillSelect(toEl, [], 'Select destination');
+  fromEl.disabled = false;
+  toEl.disabled = true;
+  summaryEl.textContent = 'Select your origin and destination, then enter payment and passenger count.';
+  clearStatus();
+}
+
+fromEl.addEventListener('change', () => {
+  const route = routeEl.value;
+  const from = fromEl.value;
+  const destinations = from && fares[route][from] ? Object.keys(fares[route][from]) : [];
+  fillSelect(toEl, destinations, 'Select destination');
+  toEl.disabled = destinations.length === 0;
+  clearStatus();
+});
+
+routeEl.addEventListener('change', populateStops);
+
+function getFare() {
+  const route = routeEl.value;
+  const from = fromEl.value;
+  const to = toEl.value;
+  if (!from || !to) return null;
+  return fares[route]?.[from]?.[to] ?? null;
+}
+
+function clearStatus() {
+  statusEl.className = 'status';
+  statusEl.textContent = '';
+}
+
+function calculate() {
+  const fare = getFare();
+  const payment = Number(paymentEl.value);
+  const passengers = Number(passengersEl.value);
+
+  if (!fare) {
+    statusEl.className = 'status bad';
+    statusEl.textContent = 'Please select a valid origin and destination.';
+    return;
+  }
+  if (!Number.isFinite(payment) || payment < 0) {
+    statusEl.className = 'status bad';
+    statusEl.textContent = 'Please enter a valid payment amount.';
+    return;
+  }
+  if (!Number.isInteger(passengers) || passengers < 1) {
+    statusEl.className = 'status bad';
+    statusEl.textContent = 'Number of passengers must be at least 1.';
+    return;
+  }
+
+  const regularTotal = fare[0] * passengers;
+  const discountTotal = fare[1] * passengers;
+  const regularChange = payment - regularTotal;
+  const discountChange = payment - discountTotal;
+
+  farePerPassengerEl.textContent = `${peso(fare[0])} regular | ${peso(fare[1])} discounted`;
+  regularTotalEl.textContent = peso(regularTotal);
+  discountTotalEl.textContent = peso(discountTotal);
+  paymentShownEl.textContent = peso(payment);
+
+  regularChangeEl.textContent = peso(Math.max(regularChange, 0));
+  discountChangeEl.textContent = peso(Math.max(discountChange, 0));
+
+  summaryEl.innerHTML =
+    `<strong>${routeEl.value}</strong><br>` +
+    `${fromEl.value} → ${toEl.value} • ${passengers} passenger${passengers === 1 ? '' : 's'}<br>` +
+    `Regular fare: ${peso(regularTotal)} • Discounted fare: ${peso(discountTotal)}`;
+
+  if (regularChange < 0 || discountChange < 0) {
+    statusEl.className = 'status bad';
+    const regularDue = Math.max(-regularChange, 0);
+    const discountDue = Math.max(-discountChange, 0);
+    const parts = [];
+    if (regularDue) parts.push(`regular short by ${peso(regularDue)}`);
+    if (discountDue) parts.push(`discounted short by ${peso(discountDue)}`);
+    statusEl.textContent = 'Insufficient payment — ' + parts.join(' • ') + '.';
+  } else {
+    statusEl.className = 'status good';
+    statusEl.textContent = 'Fare calculated successfully.';
+  }
+}
+
+function reset() {
+  routeEl.selectedIndex = 0;
+  populateStops();
+  paymentEl.value = '';
+  passengersEl.value = '1';
+  regularChangeEl.textContent = '₱0.00';
+  discountChangeEl.textContent = '₱0.00';
+  farePerPassengerEl.textContent = '—';
+  regularTotalEl.textContent = '—';
+  discountTotalEl.textContent = '—';
+  paymentShownEl.textContent = '—';
+  summaryEl.textContent = 'Select a route, origin, destination, payment, and passenger count.';
+  clearStatus();
+}
+
+document.getElementById('calculate').addEventListener('click', calculate);
+document.getElementById('reset').addEventListener('click', reset);
+
+// AUTO CALCULATE:
+// Recalculate whenever route, origin, destination, payment, or passenger count changes.
+[routeEl, fromEl, toEl, paymentEl, passengersEl].forEach(el => {
+  el.addEventListener('input', () => {
+    if (getFare() && paymentEl.value !== '' && passengersEl.value !== '') calculate();
+  });
+  el.addEventListener('change', () => {
+    if (getFare() && paymentEl.value !== '' && passengersEl.value !== '') calculate();
+  });
+});
+
+[paymentEl, passengersEl].forEach(el => {
+  el.addEventListener('keydown', e => {
+    if (e.key === 'Enter') calculate();
+  });
+});
+
+function buildReference() {
+  const container = document.getElementById('reference');
+  Object.entries(fares).forEach(([route, matrix]) => {
+    const box = document.createElement('div');
+    box.className = 'ref-route';
+    const title = document.createElement('div');
+    title.className = 'ref-title';
+    title.textContent = route;
+    const body = document.createElement('div');
+    body.className = 'ref-body';
+
+    const shown = [];
+    const seen = new Set();
+    for (const [from, destinations] of Object.entries(matrix)) {
+      for (const [to, fare] of Object.entries(destinations)) {
+        const key = [from, to].sort().join('||');
+        if (seen.has(key)) continue;
+        seen.add(key);
+        shown.push(`${from} → ${to}: ${peso(fare[0])} / ${peso(fare[1])}`);
+      }
+    }
+    body.textContent = shown.join('  •  ');
+    box.append(title, body);
+    container.appendChild(box);
+  });
+}
+
+populateRoutes();
+buildReference();
+</script>
+</body>
+</html>

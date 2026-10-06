@@ -699,231 +699,121 @@
 
 /* =========================================================
    FARE DATA
+   Every pair below is automatically made BIDIRECTIONAL.
+   This prevents a route from working one way but not the other.
    ========================================================= */
+
+function makeBidirectional(pairs) {
+  const matrix = {};
+
+  for (const [from, to, regular, discounted] of pairs) {
+    if (!matrix[from]) matrix[from] = {};
+    if (!matrix[to]) matrix[to] = {};
+
+    matrix[from][to] = [regular, discounted];
+    matrix[to][from] = [regular, discounted];
+  }
+
+  return matrix;
+}
+
+const COMMON = "SAN JOSE / BAGUMBAYAN";
+const MALOLOS_END = "STO ROSARIO / SAN JUAN";
 
 const fares = {
 
-  "Malolos Line": {
+  /* =========================================================
+     MALOLOS LINE
+     SAN JOSE / BAGUMBAYAN ↔ STO ROSARIO / SAN JUAN
+     ========================================================= */
+  "Malolos Line": makeBidirectional([
+    [COMMON, "MAYSANTOL", 14, 12],
+    [COMMON, "SN NICOLAS", 14, 12],
+    [COMMON, "PITPITAN", 14, 12],
+    [COMMON, "MAMBOG", 16, 14],
+    [COMMON, "MATIMBO", 18, 16],
+    [COMMON, "PANASAHAN", 20, 18],
+    [COMMON, "BAGNA", 22, 20],
+    [COMMON, "ATLAG", 24, 22],
+    [COMMON, MALOLOS_END, 26, 24],
 
-    "MAYSANTOL": {
-      "SN JOSE": [14,12],
-      "SN NICOLAS": [14,12],
-      "PITPITAN": [14,12],
-      "MAMBOG": [14,12],
-      "MATIMBO": [16,14],
-      "PANASAHAN": [18,16],
-      "BAGNA": [20,18],
-      "AT LAG": [22,20],
-      "STO ROSARIO (MALOLOS)/SAN JUAN": [24,22]
-    },
+    ["MAYSANTOL", "SN NICOLAS", 14, 12],
+    ["MAYSANTOL", "PITPITAN", 14, 12],
+    ["MAYSANTOL", "MAMBOG", 14, 12],
+    ["MAYSANTOL", "MATIMBO", 16, 14],
+    ["MAYSANTOL", "PANASAHAN", 18, 16],
+    ["MAYSANTOL", "BAGNA", 20, 18],
+    ["MAYSANTOL", "ATLAG", 22, 20],
+    ["MAYSANTOL", MALOLOS_END, 24, 22],
 
-    "SN NICOLAS": {
-      "SN JOSE": [14,12],
-      "MAYSANTOL": [14,12],
-      "PITPITAN": [14,12],
-      "MAMBOG": [14,12],
-      "MATIMBO": [14,12],
-      "PANASAHAN": [16,14],
-      "BAGNA": [18,16],
-      "AT LAG": [20,18],
-      "STO ROSARIO (MALOLOS)/SAN JUAN": [22,20]
-    },
+    ["SN NICOLAS", "PITPITAN", 14, 12],
+    ["SN NICOLAS", "MAMBOG", 14, 12],
+    ["SN NICOLAS", "MATIMBO", 14, 12],
+    ["SN NICOLAS", "PANASAHAN", 16, 14],
+    ["SN NICOLAS", "BAGNA", 18, 16],
+    ["SN NICOLAS", "ATLAG", 20, 18],
+    ["SN NICOLAS", MALOLOS_END, 22, 20],
 
-    "PITPITAN": {
-      "SN JOSE": [14,12],
-      "MAYSANTOL": [14,12],
-      "SN NICOLAS": [14,12],
-      "MAMBOG": [14,12],
-      "MATIMBO": [14,12],
-      "PANASAHAN": [14,12],
-      "BAGNA": [16,14],
-      "AT LAG": [18,16],
-      "STO ROSARIO (MALOLOS)/SAN JUAN": [20,18]
-    },
+    ["PITPITAN", "MAMBOG", 14, 12],
+    ["PITPITAN", "MATIMBO", 14, 12],
+    ["PITPITAN", "PANASAHAN", 14, 12],
+    ["PITPITAN", "BAGNA", 16, 14],
+    ["PITPITAN", "ATLAG", 18, 16],
+    ["PITPITAN", MALOLOS_END, 20, 18],
 
-    "MAMBOG": {
-      "SN JOSE": [16,14],
-      "MAYSANTOL": [14,12],
-      "SN NICOLAS": [14,12],
-      "PITPITAN": [14,12],
-      "MATIMBO": [14,12],
-      "PANASAHAN": [14,12],
-      "BAGNA": [14,12],
-      "AT LAG": [16,14],
-      "STO ROSARIO (MALOLOS)/SAN JUAN": [18,16]
-    },
+    ["MAMBOG", "MATIMBO", 14, 12],
+    ["MAMBOG", "PANASAHAN", 14, 12],
+    ["MAMBOG", "BAGNA", 14, 12],
+    ["MAMBOG", "ATLAG", 16, 14],
+    ["MAMBOG", MALOLOS_END, 18, 16],
 
-    "MATIMBO": {
-      "SN JOSE": [18,16],
-      "MAYSANTOL": [16,14],
-      "SN NICOLAS": [14,12],
-      "PITPITAN": [14,12],
-      "MAMBOG": [14,12],
-      "PANASAHAN": [14,12],
-      "BAGNA": [14,12],
-      "AT LAG": [14,12],
-      "STO ROSARIO (MALOLOS)/SAN JUAN": [16,14]
-    },
+    ["MATIMBO", "PANASAHAN", 14, 12],
+    ["MATIMBO", "BAGNA", 14, 12],
+    ["MATIMBO", "ATLAG", 14, 12],
+    ["MATIMBO", MALOLOS_END, 16, 14],
 
-    "PANASAHAN": {
-      "SN JOSE": [20,18],
-      "MAYSANTOL": [18,16],
-      "SN NICOLAS": [16,14],
-      "PITPITAN": [14,12],
-      "MAMBOG": [14,12],
-      "MATIMBO": [14,12],
-      "BAGNA": [14,12],
-      "AT LAG": [14,12],
+    ["PANASAHAN", "BAGNA", 14, 12],
+    ["PANASAHAN", "ATLAG", 14, 12],
+    ["PANASAHAN", MALOLOS_END, 14, 12],
 
-      /* FIXED */
-      "STO ROSARIO (MALOLOS)/SAN JUAN": [14,12]
-    },
+    ["BAGNA", "ATLAG", 14, 12],
+    ["BAGNA", MALOLOS_END, 14, 12],
 
-    "BAGNA": {
-      "SN JOSE": [22,20],
-      "MAYSANTOL": [20,18],
-      "SN NICOLAS": [18,16],
-      "PITPITAN": [16,14],
-      "MAMBOG": [14,12],
-      "MATIMBO": [14,12],
-      "PANASAHAN": [14,12],
-      "AT LAG": [14,12],
-
-      /* FIXED */
-      "STO ROSARIO (MALOLOS)/SAN JUAN": [14,12]
-    },
-
-    "AT LAG": {
-      "SN JOSE": [24,22],
-      "MAYSANTOL": [22,20],
-      "SN NICOLAS": [20,18],
-      "PITPITAN": [18,16],
-      "MAMBOG": [16,14],
-      "MATIMBO": [14,12],
-      "PANASAHAN": [14,12],
-      "BAGNA": [14,12],
-
-      /* FIXED */
-      "STO ROSARIO (MALOLOS)/SAN JUAN": [14,12]
-    },
-
-    "STO ROSARIO (MALOLOS)/SAN JUAN": {
-
-      /* FIXED */
-      "SN JOSE": [26,24],
-
-      "MAYSANTOL": [24,22],
-      "SN NICOLAS": [22,20],
-      "PITPITAN": [20,18],
-      "MAMBOG": [18,16],
-      "MATIMBO": [16,14],
-
-      /* FIXED */
-      "PANASAHAN": [14,12],
-      "BAGNA": [14,12],
-      "AT LAG": [14,12]
-    },
-
-    "SN JOSE": {
-
-      /* FIXED */
-      "STO ROSARIO (MALOLOS)/SAN JUAN": [26,24],
-
-      "MAYSANTOL": [14,12],
-      "SN NICOLAS": [14,12],
-      "PITPITAN": [14,12],
-      "MAMBOG": [16,14],
-      "MATIMBO": [18,16],
-      "PANASAHAN": [20,18],
-      "BAGNA": [22,20],
-      "AT LAG": [24,22]
-    }
-  },
+    ["ATLAG", MALOLOS_END, 14, 12]
+  ]),
 
 
   /* =========================================================
-     BULAKAN → BALAGTAS
+     BULAKAN → BALAGTAS LINE
+     SAN JOSE / BAGUMBAYAN ↔ WAWA
      ========================================================= */
+  "Bulakan → Balagtas Line": makeBidirectional([
+    [COMMON, "MATUNGAO", 14, 12],
+    [COMMON, "PANGINAY", 14, 12],
+    [COMMON, "WAWA", 16, 14],
 
-  "Bulakan → Balagtas Line": {
-
-    "PANGINAY": {
-      "WAWA": [14,12],
-      "MATUNGAO": [14,12],
-      "BAGUMBAYAN / SN JOSE": [14,12],
-      "SN JOSE": [14,12]
-    },
-
-    "MATUNGAO": {
-      "SN JOSE": [14,12],
-      "PANGINAY": [14,12],
-      "WAWA": [14,12],
-      "BAGUMBAYAN / SN JOSE": [14,12]
-    },
-
-    "WAWA": {
-      "SN JOSE": [16,14],
-      "MATUNGAO": [14,12],
-      "PANGINAY": [14,12],
-      "BAGUMBAYAN / SN JOSE": [16,14]
-    },
-
-    "BAGUMBAYAN / SN JOSE": {
-      "WAWA": [16,14],
-      "PANGINAY": [14,12],
-      "MATUNGAO": [14,12]
-    },
-
-    "SN JOSE": {
-      "MATUNGAO": [14,12],
-      "PANGINAY": [14,12],
-      "WAWA": [16,14]
-    }
-  },
+    ["MATUNGAO", "PANGINAY", 14, 12],
+    ["MATUNGAO", "WAWA", 14, 12],
+    ["PANGINAY", "WAWA", 14, 12]
+  ]),
 
 
   /* =========================================================
-     GUIGUINTO
+     GUIGUINTO LINE
+     SAN JOSE / BAGUMBAYAN ↔ BAYAN
      ========================================================= */
+  "Guiguinto Line": makeBidirectional([
+    [COMMON, "MATUNGAO", 14, 12],
+    [COMMON, "TUKTUKAN CRUZ", 14, 12],
+    [COMMON, "BAYAN", 14, 12],
 
-  "Guiguinto Line": {
-
-    "TUKTUKAN CRUZ": {
-      "GUIGUINTO": [14,12],
-      "MATUNGAO": [14,12],
-      "SN JOSE": [14,12]
-    },
-
-    "MATUNGAO": {
-      "GUIGUINTO": [14,12],
-      "SN JOSE": [14,12],
-      "TUKTUKAN CRUZ": [14,12],
-      "BAYAN": [14,12],
-      "BAGUMBAYAN / SN JOSE": [14,12]
-    },
-
-    "BAYAN": {
-      "SN JOSE": [14,12],
-      "MATUNGAO": [14,12]
-    },
-
-    "BAGUMBAYAN / SN JOSE": {
-      "GUIGUINTO": [14,12],
-      "MATUNGAO": [14,12]
-    },
-
-    "GUIGUINTO": {
-      "TUKTUKAN CRUZ": [14,12],
-      "MATUNGAO": [14,12],
-      "BAGUMBAYAN / SN JOSE": [14,12]
-    },
-
-    "SN JOSE": {
-      "MATUNGAO": [14,12],
-      "TUKTUKAN CRUZ": [14,12],
-      "BAYAN": [14,12]
-    }
-  }
+    ["MATUNGAO", "TUKTUKAN CRUZ", 14, 12],
+    ["MATUNGAO", "BAYAN", 14, 12],
+    ["TUKTUKAN CRUZ", "BAYAN", 14, 12],
+    ["TUKTUKAN CRUZ", "GUIGUINTO", 14, 12],
+    ["MATUNGAO", "GUIGUINTO", 14, 12],
+    [COMMON, "GUIGUINTO", 14, 12]
+  ])
 };
 
 
@@ -937,39 +827,18 @@ const toEl = document.getElementById('to');
 const paymentEl = document.getElementById('payment');
 const passengersEl = document.getElementById('passengers');
 
-const regularChangeEl =
-  document.getElementById('regularChange');
+const regularChangeEl = document.getElementById('regularChange');
+const discountChangeEl = document.getElementById('discountChange');
+const farePerPassengerEl = document.getElementById('farePerPassenger');
+const regularTotalEl = document.getElementById('regularTotal');
+const discountTotalEl = document.getElementById('discountTotal');
+const paymentShownEl = document.getElementById('paymentShown');
+const summaryEl = document.getElementById('summary');
+const statusEl = document.getElementById('status');
+const paymentButtons = document.querySelectorAll('#paymentButtons .choice-btn');
+const passengerButtons = document.querySelectorAll('#passengerButtons .choice-btn');
 
-const discountChangeEl =
-  document.getElementById('discountChange');
-
-const farePerPassengerEl =
-  document.getElementById('farePerPassenger');
-
-const regularTotalEl =
-  document.getElementById('regularTotal');
-
-const discountTotalEl =
-  document.getElementById('discountTotal');
-
-const paymentShownEl =
-  document.getElementById('paymentShown');
-
-const summaryEl =
-  document.getElementById('summary');
-
-const statusEl =
-  document.getElementById('status');
-
-const paymentButtons =
-  document.querySelectorAll('#paymentButtons .choice-btn');
-
-const passengerButtons =
-  document.querySelectorAll('#passengerButtons .choice-btn');
-
-
-const peso = n =>
-  `₱${Number(n).toFixed(2)}`;
+const peso = n => `₱${Number(n).toFixed(2)}`;
 
 
 /* =========================================================
@@ -977,8 +846,8 @@ const peso = n =>
    ========================================================= */
 
 const stopOrder = {
-
   "Malolos Line": [
+    COMMON,
     "MAYSANTOL",
     "SN NICOLAS",
     "PITPITAN",
@@ -986,22 +855,24 @@ const stopOrder = {
     "MATIMBO",
     "PANASAHAN",
     "BAGNA",
-    "AT LAG",
-    "STO ROSARIO (MALOLOS)/SAN JUAN"
+    "ATLAG",
+    MALOLOS_END
   ],
 
   "Bulakan → Balagtas Line": [
+    COMMON,
     "MATUNGAO",
     "PANGINAY",
     "WAWA"
   ],
 
   "Guiguinto Line": [
+    COMMON,
     "MATUNGAO",
     "TUKTUKAN CRUZ",
-    "BAYAN"
+    "BAYAN",
+    "GUIGUINTO"
   ]
-
 };
 
 
@@ -1009,23 +880,17 @@ const stopOrder = {
    PAYMENT
    ========================================================= */
 
-function selectPayment(value){
-
+function selectPayment(value) {
   paymentEl.value = String(value);
 
   paymentButtons.forEach(btn => {
-
     btn.classList.toggle(
       'selected',
       btn.dataset.payment === String(value)
     );
-
   });
 
-  if(
-    getFare() &&
-    passengersEl.value !== ''
-  ){
+  if (getFare() && passengersEl.value !== '') {
     calculate();
   }
 }
@@ -1035,45 +900,33 @@ function selectPayment(value){
    PASSENGERS
    ========================================================= */
 
-function selectPassengers(value){
-
+function selectPassengers(value) {
   passengersEl.value = String(value);
 
   passengerButtons.forEach(btn => {
-
     btn.classList.toggle(
       'selected',
       btn.dataset.passengers === String(value)
     );
-
   });
 
-  if(
-    getFare() &&
-    paymentEl.value !== ''
-  ){
+  if (getFare() && paymentEl.value !== '') {
     calculate();
   }
 }
 
-
 paymentButtons.forEach(btn => {
-
   btn.addEventListener(
     'click',
     () => selectPayment(btn.dataset.payment)
   );
-
 });
 
-
 passengerButtons.forEach(btn => {
-
   btn.addEventListener(
     'click',
     () => selectPassengers(btn.dataset.passengers)
   );
-
 });
 
 
@@ -1081,92 +934,47 @@ passengerButtons.forEach(btn => {
    ROUTES
    ========================================================= */
 
-function routeStops(route){
-
-  return stopOrder[route] ||
-    Object.keys(fares[route]);
-
+function routeStops(route) {
+  return stopOrder[route] || Object.keys(fares[route] || {});
 }
 
-
-function fillSelect(
-  el,
-  values,
-  placeholder
-){
-
+function fillSelect(el, values, placeholder) {
   el.innerHTML = '';
 
-  if(placeholder){
-
-    const p =
-      document.createElement('option');
-
+  if (placeholder) {
+    const p = document.createElement('option');
     p.value = '';
     p.textContent = placeholder;
-
     el.appendChild(p);
   }
 
-  values.forEach(v => {
-
-    const o =
-      document.createElement('option');
-
-    o.value = v;
-    o.textContent = v;
-
-    el.appendChild(o);
-
+  values.forEach(value => {
+    const option = document.createElement('option');
+    option.value = value;
+    option.textContent = value;
+    el.appendChild(option);
   });
-
 }
 
-
-/* =========================================================
-   POPULATE ROUTES
-   ========================================================= */
-
-function populateRoutes(){
+function populateRoutes() {
+  routeEl.innerHTML = '';
 
   Object.keys(fares).forEach(route => {
-
-    const o =
-      document.createElement('option');
-
-    o.value = route;
-    o.textContent = route;
-
-    routeEl.appendChild(o);
-
+    const option = document.createElement('option');
+    option.value = route;
+    option.textContent = route;
+    routeEl.appendChild(option);
   });
 
   populateStops();
 }
 
-
-/* =========================================================
-   POPULATE STOPS
-   ========================================================= */
-
-function populateStops(){
-
+function populateStops() {
   const route = routeEl.value;
+  const stops = routeStops(route);
 
-  const stops =
-    routeStops(route);
-
-  fillSelect(
-    fromEl,
-    stops,
-    'Select origin'
-  );
-
-  fillSelect(
-    toEl,
-    [],
-    'Select destination'
-  );
+  fillSelect(fromEl, stops, 'Select origin');
+  fillSelect(toEl, [], 'Select destination');
 
   fromEl.disabled = false;
   toEl.disabled = true;
@@ -1182,69 +990,51 @@ function populateStops(){
    DESTINATION
    ========================================================= */
 
-fromEl.addEventListener(
-  'change',
-  () => {
+fromEl.addEventListener('change', () => {
+  const route = routeEl.value;
+  const from = fromEl.value;
+  const matrix = fares[route] || {};
 
-    const route =
-      routeEl.value;
+  const destinations = from && matrix[from]
+    ? routeStops(route).filter(stop =>
+        stop !== from && !!matrix[from][stop]
+      )
+    : [];
 
-    const from =
-      fromEl.value;
+  fillSelect(toEl, destinations, 'Select destination');
+  toEl.disabled = destinations.length === 0;
 
-    const destinations =
-      from &&
-      fares[route][from]
+  clearStatus();
+});
 
-        ? routeStops(route).filter(
-            stop =>
-              stop !== from &&
-              fares[route][from][stop]
-          )
-
-        : [];
-
-    fillSelect(
-      toEl,
-      destinations,
-      'Select destination'
-    );
-
-    toEl.disabled =
-      destinations.length === 0;
-
-    clearStatus();
-
-  }
-);
-
-
-routeEl.addEventListener(
-  'change',
-  populateStops
-);
+routeEl.addEventListener('change', populateStops);
 
 
 /* =========================================================
    GET FARE
+   Forward AND reverse lookup.
+   Even if only one direction is stored, the other direction works.
    ========================================================= */
 
-function getFare(){
+function getFare() {
+  const route = routeEl.value;
+  const from = fromEl.value;
+  const to = toEl.value;
+  const matrix = fares[route] || {};
 
-  const route =
-    routeEl.value;
+  if (!from || !to) return null;
 
-  const from =
-    fromEl.value;
-
-  const to =
-    toEl.value;
-
-  if(!from || !to){
-    return null;
+  // Normal direction
+  if (matrix[from] && matrix[from][to]) {
+    return matrix[from][to];
   }
 
-  return fares[route]?.[from]?.[to] ?? null;
+  // Reverse direction fallback
+  if (matrix[to] && matrix[to][from]) {
+    return matrix[to][from];
+  }
+
+  return null;
 }
 
 
@@ -1252,14 +1042,9 @@ function getFare(){
    STATUS
    ========================================================= */
 
-function clearStatus(){
-
-  statusEl.className =
-    'status';
-
-  statusEl.textContent =
-    '';
-
+function clearStatus() {
+  statusEl.className = 'status';
+  statusEl.textContent = '';
 }
 
 
@@ -1267,176 +1052,77 @@ function clearStatus(){
    CALCULATE
    ========================================================= */
 
-function calculate(){
+function calculate() {
+  const fare = getFare();
+  const payment = Number(paymentEl.value);
+  const passengers = Number(passengersEl.value);
 
-  const fare =
-    getFare();
-
-  const payment =
-    Number(paymentEl.value);
-
-  const passengers =
-    Number(passengersEl.value);
-
-
-  if(!fare){
-
-    statusEl.className =
-      'status bad';
-
+  if (!fare) {
+    statusEl.className = 'status bad';
     statusEl.textContent =
-      'Please select a valid origin and destination.';
-
+      'No fare is available for this point-to-point combination.';
     return;
   }
 
-
-  if(
-    !Number.isFinite(payment) ||
-    payment < 0
-  ){
-
-    statusEl.className =
-      'status bad';
-
-    statusEl.textContent =
-      'Please enter a valid payment amount.';
-
+  if (!Number.isFinite(payment) || payment < 0) {
+    statusEl.className = 'status bad';
+    statusEl.textContent = 'Please enter a valid payment amount.';
     return;
   }
 
-
-  if(
-    !Number.isInteger(passengers) ||
-    passengers < 1
-  ){
-
-    statusEl.className =
-      'status bad';
-
-    statusEl.textContent =
-      'Number of passengers must be at least 1.';
-
+  if (!Number.isInteger(passengers) || passengers < 1) {
+    statusEl.className = 'status bad';
+    statusEl.textContent = 'Number of passengers must be at least 1.';
     return;
   }
 
+  const regularTotal = fare[0] * passengers;
+  const discountTotal = fare[1] * passengers;
 
-  const regularTotal =
-    fare[0] * passengers;
-
-  const discountTotal =
-    fare[1] * passengers;
-
-  const regularChange =
-    payment - regularTotal;
-
-  const discountChange =
-    payment - discountTotal;
-
+  const regularChange = payment - regularTotal;
+  const discountChange = payment - discountTotal;
 
   farePerPassengerEl.textContent =
     `${peso(fare[0])} regular | ${peso(fare[1])} discounted`;
 
-  regularTotalEl.textContent =
-    peso(regularTotal);
-
-  discountTotalEl.textContent =
-    peso(discountTotal);
-
-  paymentShownEl.textContent =
-    peso(payment);
-
+  regularTotalEl.textContent = peso(regularTotal);
+  discountTotalEl.textContent = peso(discountTotal);
+  paymentShownEl.textContent = peso(payment);
 
   regularChangeEl.textContent =
-    peso(
-      Math.max(
-        regularChange,
-        0
-      )
-    );
+    peso(Math.max(regularChange, 0));
 
   discountChangeEl.textContent =
-    peso(
-      Math.max(
-        discountChange,
-        0
-      )
-    );
-
+    peso(Math.max(discountChange, 0));
 
   summaryEl.innerHTML =
-
     `<strong>${routeEl.value}</strong><br>` +
-
     `${fromEl.value} → ${toEl.value} • ` +
-
-    `${passengers} passenger` +
-
-    `${passengers === 1 ? '' : 's'}<br>` +
-
+    `${passengers} passenger${passengers === 1 ? '' : 's'}<br>` +
     `Regular fare: ${peso(regularTotal)} • ` +
-
     `Discounted fare: ${peso(discountTotal)}`;
 
+  if (regularChange < 0 || discountChange < 0) {
+    statusEl.className = 'status bad';
 
-  if(
-    regularChange < 0 ||
-    discountChange < 0
-  ){
-
-    statusEl.className =
-      'status bad';
-
-    const regularDue =
-      Math.max(
-        -regularChange,
-        0
-      );
-
-    const discountDue =
-      Math.max(
-        -discountChange,
-        0
-      );
-
+    const regularDue = Math.max(-regularChange, 0);
+    const discountDue = Math.max(-discountChange, 0);
     const parts = [];
 
-
-    if(regularDue){
-
-      parts.push(
-        `regular short by ${peso(regularDue)}`
-      );
-
+    if (regularDue) {
+      parts.push(`regular short by ${peso(regularDue)}`);
     }
 
-
-    if(discountDue){
-
-      parts.push(
-        `discounted short by ${peso(discountDue)}`
-      );
-
+    if (discountDue) {
+      parts.push(`discounted short by ${peso(discountDue)}`);
     }
 
-
     statusEl.textContent =
-      'Insufficient payment — ' +
-      parts.join(' • ') +
-      '.';
-
+      'Insufficient payment — ' + parts.join(' • ') + '.';
+  } else {
+    statusEl.className = 'status good';
+    statusEl.textContent = 'Fare calculated successfully.';
   }
-
-  else{
-
-    statusEl.className =
-      'status good';
-
-    statusEl.textContent =
-      'Fare calculated successfully.';
-
-  }
-
 }
 
 
@@ -1444,122 +1130,73 @@ function calculate(){
    RESET
    ========================================================= */
 
-function reset(){
-
+function reset() {
   routeEl.selectedIndex = 0;
-
   populateStops();
 
   paymentEl.value = '';
-
   passengersEl.value = '1';
 
-
-  paymentButtons.forEach(
-    btn =>
-      btn.classList.remove('selected')
+  paymentButtons.forEach(btn =>
+    btn.classList.remove('selected')
   );
 
-
-  passengerButtons.forEach(
-    btn =>
-      btn.classList.toggle(
-        'selected',
-        btn.dataset.passengers === '1'
-      )
+  passengerButtons.forEach(btn =>
+    btn.classList.toggle(
+      'selected',
+      btn.dataset.passengers === '1'
+    )
   );
 
-
-  regularChangeEl.textContent =
-    '₱0.00';
-
-  discountChangeEl.textContent =
-    '₱0.00';
-
-  farePerPassengerEl.textContent =
-    '—';
-
-  regularTotalEl.textContent =
-    '—';
-
-  discountTotalEl.textContent =
-    '—';
-
-  paymentShownEl.textContent =
-    '—';
+  regularChangeEl.textContent = '₱0.00';
+  discountChangeEl.textContent = '₱0.00';
+  farePerPassengerEl.textContent = '—';
+  regularTotalEl.textContent = '—';
+  discountTotalEl.textContent = '—';
+  paymentShownEl.textContent = '—';
 
   summaryEl.textContent =
     'Select a route, origin, destination, payment, and passenger count.';
 
   clearStatus();
-
 }
 
 
-document
-  .getElementById('calculate')
-  .addEventListener(
-    'click',
-    calculate
-  );
+document.getElementById('calculate').addEventListener(
+  'click',
+  calculate
+);
 
-
-document
-  .getElementById('reset')
-  .addEventListener(
-    'click',
-    reset
-  );
+document.getElementById('reset').addEventListener(
+  'click',
+  reset
+);
 
 
 /* =========================================================
    AUTO CALCULATE
    ========================================================= */
 
-[
-  routeEl,
-  fromEl,
-  toEl,
-  paymentEl,
-  passengersEl
-
-].forEach(el => {
-
-  el.addEventListener(
-    'input',
-    () => {
-
-      if(
-        getFare() &&
-        paymentEl.value !== '' &&
-        passengersEl.value !== ''
-      ){
-
-        calculate();
-
-      }
-
+[routeEl, fromEl, toEl, paymentEl, passengersEl].forEach(el => {
+  el.addEventListener('input', () => {
+    if (
+      getFare() &&
+      paymentEl.value !== '' &&
+      passengersEl.value !== ''
+    ) {
+      calculate();
     }
-  );
+  });
 
-
-  el.addEventListener(
-    'change',
-    () => {
-
-      if(
-        getFare() &&
-        paymentEl.value !== '' &&
-        passengersEl.value !== ''
-      ){
-
-        calculate();
-
-      }
-
+  el.addEventListener('change', () => {
+    if (
+      getFare() &&
+      paymentEl.value !== '' &&
+      passengersEl.value !== ''
+    ) {
+      calculate();
     }
-  );
-
+  });
 });
 
 
@@ -1567,113 +1204,47 @@ document
    FARE TABLE REFERENCE
    ========================================================= */
 
-function buildReference(){
+function buildReference() {
+  const container = document.getElementById('reference');
+  container.innerHTML = '';
 
-  const container =
-    document.getElementById('reference');
+  Object.entries(fares).forEach(([route, matrix]) => {
+    const box = document.createElement('div');
+    box.className = 'ref-route';
 
+    const title = document.createElement('div');
+    title.className = 'ref-title';
+    title.textContent = route;
 
-  Object.entries(fares).forEach(
-    ([route, matrix]) => {
+    const body = document.createElement('div');
+    body.className = 'ref-body';
 
-      const box =
-        document.createElement('div');
+    const shown = [];
+    const seen = new Set();
 
-      box.className =
-        'ref-route';
+    for (const from of routeStops(route)) {
+      const destinations = matrix[from] || {};
 
+      for (const to of routeStops(route)) {
+        if (!destinations[to]) continue;
 
-      const title =
-        document.createElement('div');
+        const key = [from, to].sort().join('||');
+        if (seen.has(key)) continue;
+        seen.add(key);
 
-      title.className =
-        'ref-title';
+        const fare = destinations[to];
 
-      title.textContent =
-        route;
-
-
-      const body =
-        document.createElement('div');
-
-      body.className =
-        'ref-body';
-
-
-      const shown = [];
-
-      const seen =
-        new Set();
-
-      const orderedStops =
-        routeStops(route);
-
-
-      for(
-        const from of orderedStops
-      ){
-
-        const destinations =
-          matrix[from] || {};
-
-
-        for(
-          const to of orderedStops
-        ){
-
-          if(
-            !destinations[to]
-          ){
-            continue;
-          }
-
-
-          const fare =
-            destinations[to];
-
-
-          const key =
-            [from,to]
-              .sort()
-              .join('||');
-
-
-          if(
-            seen.has(key)
-          ){
-            continue;
-          }
-
-
-          seen.add(key);
-
-
-          shown.push(
-            `${from} → ${to}: ` +
-            `${peso(fare[0])} / ` +
-            `${peso(fare[1])}`
-          );
-
-        }
-
+        shown.push(
+          `${from} → ${to}: ${peso(fare[0])} / ${peso(fare[1])}`
+        );
       }
-
-
-      body.textContent =
-        shown.join('  •  ');
-
-
-      box.append(
-        title,
-        body
-      );
-
-
-      container.appendChild(box);
-
     }
-  );
 
+    body.textContent = shown.join('  •  ');
+
+    box.append(title, body);
+    container.appendChild(box);
+  });
 }
 
 
@@ -1682,7 +1253,6 @@ function buildReference(){
    ========================================================= */
 
 populateRoutes();
-
 buildReference();
 
 </script>

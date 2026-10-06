@@ -1,0 +1,488 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Diesel N Steel Fare Calculator</title>
+<style>
+  :root{
+    --yellow:#ffc400;
+    --yellow2:#ffdb4d;
+    --black:#0b0b0b;
+    --dark:#171717;
+    --panel:#242424;
+    --panel2:#303030;
+    --line:#454545;
+    --text:#f5f5f5;
+    --muted:#bdbdbd;
+    --green:#39d98a;
+    --red:#ff6262;
+  }
+  *{box-sizing:border-box}
+  body{
+    margin:0;
+    min-height:100vh;
+    font-family:Arial,Helvetica,sans-serif;
+    background:
+      radial-gradient(circle at 15% 10%,rgba(255,196,0,.12),transparent 28%),
+      linear-gradient(135deg,#090909 0%,#191919 55%,#0b0b0b 100%);
+    color:var(--text);
+  }
+  .wrap{width:min(1120px,94%);margin:0 auto;padding:28px 0 45px}
+  header{
+    display:flex;align-items:center;justify-content:space-between;gap:20px;
+    padding:20px 24px;margin-bottom:20px;border:1px solid #3b3b3b;
+    border-radius:18px;background:linear-gradient(135deg,#202020,#111);
+    box-shadow:0 12px 35px rgba(0,0,0,.35);
+  }
+  .brand{display:flex;align-items:center;gap:16px}
+  .logo{
+    font-weight:1000;line-height:.8;letter-spacing:-2px;
+    transform:skew(-6deg);text-shadow:3px 3px 0 #000;
+    font-size:31px;
+  }
+  .logo .diesel{color:#ffbd22}
+  .logo .steel{color:#a8a8a8;display:block;margin-left:22px;font-size:28px}
+  .logo .n{color:#fff;font-size:20px;position:relative;top:-1px;margin-left:7px}
+  h1{margin:0;font-size:26px}
+  .subtitle{margin:5px 0 0;color:var(--muted);font-size:13px}
+  .badge{
+    padding:9px 13px;border:1px solid #5a4700;border-radius:999px;
+    color:#171717;background:var(--yellow);font-weight:800;font-size:12px;
+    white-space:nowrap;
+  }
+  .grid{display:grid;grid-template-columns:1fr 1fr;gap:20px}
+  .card{
+    background:linear-gradient(180deg,#252525,#1a1a1a);
+    border:1px solid #3d3d3d;border-radius:18px;padding:22px;
+    box-shadow:0 10px 30px rgba(0,0,0,.28);
+  }
+  .card h2{font-size:16px;margin:0 0 18px;color:var(--yellow)}
+  .field{margin-bottom:15px}
+  label{display:block;font-size:12px;font-weight:800;color:#d8d8d8;margin-bottom:7px;text-transform:uppercase;letter-spacing:.5px}
+  select,input{
+    width:100%;height:48px;border:1px solid #4a4a4a;border-radius:11px;
+    background:#101010;color:#fff;padding:0 13px;font-size:15px;outline:none;
+  }
+  select:focus,input:focus{border-color:var(--yellow);box-shadow:0 0 0 3px rgba(255,196,0,.12)}
+  .row{display:grid;grid-template-columns:1fr 1fr;gap:12px}
+  .choice-buttons{display:grid;grid-template-columns:repeat(3,1fr);gap:8px}
+  .choice-buttons.passenger-buttons{grid-template-columns:repeat(5,1fr)}
+  .choice-btn{
+    height:48px;border:2px solid #444;border-radius:11px;
+    background:#202020;color:#fff;font-size:15px;font-weight:900;
+    cursor:pointer;transition:.15s ease;
+  }
+  .choice-btn:hover{transform:translateY(-1px);filter:brightness(1.08)}
+  .choice-btn.selected{border-color:#fff;box-shadow:0 0 0 2px rgba(255,255,255,.18)}
+  .payment-20{background:#f28c28;color:#111;border-color:#f28c28}
+  .payment-50{background:#d93636;color:#fff;border-color:#d93636}
+  .payment-100{background:#7b3fc6;color:#fff;border-color:#7b3fc6}
+  .passenger-btn{background:#333;border-color:#555}
+  .actions{display:flex;gap:10px;margin-top:7px}
+  button{
+    border:0;border-radius:11px;height:48px;padding:0 20px;font-weight:900;
+    cursor:pointer;font-size:14px;
+  }
+  .calculate{flex:1;background:var(--yellow);color:#111}
+  .calculate:hover{background:var(--yellow2)}
+  .reset{background:#333;color:#eee;border:1px solid #4b4b4b}
+  .results{display:grid;grid-template-columns:1fr 1fr;gap:12px;margin-top:16px}
+  .result{
+    padding:16px;border-radius:14px;background:#101010;border:1px solid #393939;
+  }
+  .result .label{margin:0 0 6px;color:#aaa}
+  .money{font-size:28px;font-weight:950}
+  .regular .money{color:#fff}
+  .discount .money{color:var(--yellow)}
+  .summary{
+    margin-top:14px;padding:14px;border-radius:13px;
+    background:#151515;border:1px dashed #555;line-height:1.55;font-size:13px;color:#d5d5d5;
+  }
+  .summary strong{color:#fff}
+  .status{
+    margin-top:12px;padding:11px 13px;border-radius:10px;font-size:13px;font-weight:800;display:none;
+  }
+  .status.good{display:block;color:#9ff0c5;background:rgba(57,217,138,.08);border:1px solid rgba(57,217,138,.3)}
+  .status.bad{display:block;color:#ff9c9c;background:rgba(255,98,98,.08);border:1px solid rgba(255,98,98,.3)}
+  .note{font-size:11px;color:#8f8f8f;margin-top:13px;line-height:1.45}
+  .fare-ref{grid-column:1/-1}
+  details{border:1px solid #3d3d3d;border-radius:15px;background:#1b1b1b;overflow:hidden}
+  summary{cursor:pointer;padding:15px 18px;font-weight:900;color:var(--yellow);list-style:none}
+  summary::-webkit-details-marker{display:none}
+  summary:after{content:"＋";float:right;color:#aaa}
+  details[open] summary:after{content:"−"}
+  .reference{padding:0 18px 18px;display:grid;gap:10px}
+  .ref-route{border:1px solid #383838;border-radius:10px;overflow:hidden}
+  .ref-title{background:#303030;padding:10px 12px;font-weight:900;color:var(--yellow);font-size:13px}
+  .ref-body{padding:10px 12px;color:#ccc;font-size:12px;line-height:1.6}
+  footer{text-align:center;color:#777;font-size:11px;margin-top:18px}
+  @media(max-width:780px){
+    header{align-items:flex-start;flex-direction:column}
+    .grid{grid-template-columns:1fr}
+    .fare-ref{grid-column:auto}
+  }
+  @media(max-width:480px){
+    .row,.results{grid-template-columns:1fr}
+    .wrap{width:94%;padding-top:14px}
+    .card{padding:17px}
+    .logo{font-size:25px}.logo .steel{font-size:23px}
+  }
+</style>
+</head>
+<body>
+<div class="wrap">
+  <header>
+    <div class="brand">
+      <div class="logo"><span class="diesel">DIESEL</span><span class="n">N</span><span class="steel">STEEL</span></div>
+      <div>
+        <h1>Fare Calculator</h1>
+        <p class="subtitle">Roblox Jeepney Simulator • Diesel N Steel</p>
+      </div>
+    </div>
+    <div class="badge">FARE TABLE • SEPT 28</div>
+  </header>
+
+  <main class="grid">
+    <section class="card">
+      <h2>TRIP DETAILS <span style="font-size:11px;color:#aaa;font-weight:600;">• BOTH DIRECTIONS SUPPORTED</span></h2>
+      <div class="field">
+        <label for="route">Route</label>
+        <select id="route"></select>
+      </div>
+
+      <div class="row">
+        <div class="field">
+          <label for="from">From</label>
+          <select id="from"></select>
+        </div>
+        <div class="field">
+          <label for="to">To</label>
+          <select id="to"></select>
+        </div>
+      </div>
+
+      <div class="row">
+        <div class="field">
+          <label>Payment (₱)</label>
+          <div class="choice-buttons" id="paymentButtons">
+            <button type="button" class="choice-btn payment-20" data-payment="20">₱20</button>
+            <button type="button" class="choice-btn payment-50" data-payment="50">₱50</button>
+            <button type="button" class="choice-btn payment-100" data-payment="100">₱100</button>
+          </div>
+          <input id="payment" type="hidden" value="">
+        </div>
+        <div class="field">
+          <label>Passengers</label>
+          <div class="choice-buttons passenger-buttons" id="passengerButtons">
+            <button type="button" class="choice-btn passenger-btn selected" data-passengers="1">1</button>
+            <button type="button" class="choice-btn passenger-btn" data-passengers="2">2</button>
+            <button type="button" class="choice-btn passenger-btn" data-passengers="3">3</button>
+            <button type="button" class="choice-btn passenger-btn" data-passengers="4">4</button>
+            <button type="button" class="choice-btn passenger-btn" data-passengers="5">5</button>
+          </div>
+          <input id="passengers" type="hidden" value="1">
+        </div>
+      </div>
+
+      <div class="actions">
+        <button class="calculate" id="calculate">CALCULATE FARE</button>
+        <button class="reset" id="reset">RESET</button>
+      </div>
+
+      <div class="status" id="status"></div>
+      <div class="summary" id="summary">Select a route, origin, destination, payment, and passenger count.</div>
+      <div class="note">Regular and discounted amounts are calculated separately. Discounted means the second fare value shown in the supplied fare table.</div>
+    </section>
+
+    <section class="card">
+      <h2>CHANGE</h2>
+      <div class="results">
+        <div class="result regular">
+          <div class="label">REGULAR CHANGE</div>
+          <div class="money" id="regularChange">₱0.00</div>
+        </div>
+        <div class="result discount">
+          <div class="label">DISCOUNTED CHANGE</div>
+          <div class="money" id="discountChange">₱0.00</div>
+        </div>
+      </div>
+
+      <div class="summary">
+        <div><strong>Fare / passenger:</strong> <span id="farePerPassenger">—</span></div>
+        <div><strong>Total regular fare:</strong> <span id="regularTotal">—</span></div>
+        <div><strong>Total discounted fare:</strong> <span id="discountTotal">—</span></div>
+        <div><strong>Payment:</strong> <span id="paymentShown">—</span></div>
+      </div>
+    </section>
+
+    <section class="fare-ref">
+      <details>
+        <summary>VIEW FARE TABLE REFERENCE</summary>
+        <div class="reference" id="reference"></div>
+      </details>
+    </section>
+  </main>
+
+  <footer>Diesel N Steel Fare Calculator • Data based on the supplied Diesel N Steel fare tables • fares work both ways • dropdowns follow the supplied route order.</footer>
+</div>
+
+<script>
+const fares = {"Malolos Line": {"MAYSANTOL": {"SN JOSE": [14, 12], "SN NICOLAS": [14, 12], "PITPITAN": [14, 12], "MAMBOG": [14, 12], "MATIMBO": [16, 14], "PANASAHAN": [18, 16], "BAGNA": [20, 18], "AT LAG": [22, 20], "STO ROSARIO (MALOLOS)/SAN JUAN": [24, 22]}, "SN NICOLAS": {"SN JOSE": [14, 12], "MAYSANTOL": [14, 12], "PITPITAN": [14, 12], "MAMBOG": [14, 12], "MATIMBO": [14, 12], "PANASAHAN": [16, 14], "BAGNA": [18, 16], "AT LAG": [20, 18], "STO ROSARIO (MALOLOS)/SAN JUAN": [22, 20]}, "PITPITAN": {"SN JOSE": [14, 12], "MAYSANTOL": [14, 12], "SN NICOLAS": [14, 12], "MAMBOG": [14, 12], "MATIMBO": [14, 12], "PANASAHAN": [14, 12], "BAGNA": [16, 14], "AT LAG": [18, 16], "STO ROSARIO (MALOLOS)/SAN JUAN": [20, 18]}, "MAMBOG": {"SN JOSE": [16, 14], "MAYSANTOL": [14, 12], "SN NICOLAS": [14, 12], "PITPITAN": [14, 12], "MATIMBO": [14, 12], "PANASAHAN": [14, 12], "BAGNA": [14, 12], "AT LAG": [16, 14], "STO ROSARIO (MALOLOS)/SAN JUAN": [18, 16]}, "MATIMBO": {"SN JOSE": [18, 16], "MAYSANTOL": [16, 14], "SN NICOLAS": [14, 12], "PITPITAN": [14, 12], "MAMBOG": [14, 12], "PANASAHAN": [14, 12], "BAGNA": [14, 12], "AT LAG": [14, 12], "STO ROSARIO (MALOLOS)/SAN JUAN": [16, 14]}, "PANASAHAN": {"SN JOSE": [20, 18], "MAYSANTOL": [18, 16], "SN NICOLAS": [16, 14], "PITPITAN": [14, 12], "MAMBOG": [14, 12], "MATIMBO": [14, 12], "BAGNA": [14, 12], "AT LAG": [14, 12], "STO ROSARIO (MALOLOS)/SAN JUAN": [20, 18]}, "BAGNA": {"SN JOSE": [22, 20], "MAYSANTOL": [20, 18], "SN NICOLAS": [18, 16], "PITPITAN": [16, 14], "MAMBOG": [14, 12], "MATIMBO": [14, 12], "PANASAHAN": [14, 12], "AT LAG": [14, 12], "STO ROSARIO (MALOLOS)/SAN JUAN": [22, 20]}, "AT LAG": {"SN JOSE": [24, 22], "MAYSANTOL": [22, 20], "SN NICOLAS": [20, 18], "PITPITAN": [18, 16], "MAMBOG": [16, 14], "MATIMBO": [14, 12], "PANASAHAN": [14, 12], "BAGNA": [14, 12], "STO ROSARIO (MALOLOS)/SAN JUAN": [24, 22]}, "STO ROSARIO (MALOLOS)/SAN JUAN": {"SN JOSE": [26, 22], "MAYSANTOL": [24, 22], "SN NICOLAS": [22, 20], "PITPITAN": [20, 18], "MAMBOG": [18, 16], "MATIMBO": [16, 14], "PANASAHAN": [20, 18], "BAGNA": [22, 20], "AT LAG": [24, 22]}, "SN JOSE": {"STO ROSARIO (MALOLOS)/SAN JUAN": [26, 22], "MAYSANTOL": [14, 12], "SN NICOLAS": [14, 12], "PITPITAN": [14, 12], "MAMBOG": [16, 14], "MATIMBO": [18, 16], "PANASAHAN": [20, 18], "BAGNA": [22, 20], "AT LAG": [24, 22]}}, "Bulakan → Balagtas Line": {"PANGINAY": {"WAWA": [14, 12], "MATUNGAO": [14, 12], "BAGUMBAYAN / SN JOSE": [14, 12], "SN JOSE": [14, 12]}, "MATUNGAO": {"SN JOSE": [14, 12], "PANGINAY": [14, 12], "WAWA": [14, 12], "BAGUMBAYAN / SN JOSE": [14, 12]}, "WAWA": {"SN JOSE": [16, 14], "MATUNGAO": [14, 12], "PANGINAY": [14, 12], "BAGUMBAYAN / SN JOSE": [16, 14]}, "BAGUMBAYAN / SN JOSE": {"WAWA": [16, 14], "PANGINAY": [14, 12], "MATUNGAO": [14, 12]}, "SN JOSE": {"MATUNGAO": [14, 12], "PANGINAY": [14, 12], "WAWA": [16, 14]}}, "Guiguinto Line": {"TUKTUKAN CRUZ": {"GUIGUINTO": [14, 12], "MATUNGAO": [14, 12], "SN JOSE": [14, 12]}, "MATUNGAO": {"GUIGUINTO": [14, 12], "SN JOSE": [14, 12], "TUKTUKAN CRUZ": [14, 12], "BAYAN": [14, 12], "BAGUMBAYAN / SN JOSE": [14, 12]}, "BAYAN": {"SN JOSE": [14, 12], "MATUNGAO": [14, 12]}, "BAGUMBAYAN / SN JOSE": {"GUIGUINTO": [14, 12], "MATUNGAO": [14, 12]}, "GUIGUINTO": {"TUKTUKAN CRUZ": [14, 12], "MATUNGAO": [14, 12], "BAGUMBAYAN / SN JOSE": [14, 12]}, "SN JOSE": {"MATUNGAO": [14, 12], "TUKTUKAN CRUZ": [14, 12], "BAYAN": [14, 12]}}};
+
+const routeEl = document.getElementById('route');
+const fromEl = document.getElementById('from');
+const toEl = document.getElementById('to');
+const paymentEl = document.getElementById('payment');
+const passengersEl = document.getElementById('passengers');
+
+// Stop order follows the supplied Diesel N Steel route boards.
+// This order is used consistently for both From and To dropdowns.
+const stopOrder = {
+  "Malolos Line": [
+    "MAYSANTOL",
+    "SN NICOLAS",
+    "PITPITAN",
+    "MAMBOG",
+    "MATIMBO",
+    "PANASAHAN",
+    "BAGNA",
+    "AT LAG",
+    "STO ROSARIO (MALOLOS)/SAN JUAN"
+  ],
+  "Bulakan → Balagtas Line": [
+    "MATUNGAO",
+    "PANGINAY",
+    "WAWA"
+  ],
+  "Guiguinto Line": [
+    "MATUNGAO",
+    "TUKTUKAN CRUZ",
+    "BAYAN"
+  ]
+};
+
+const regularChangeEl = document.getElementById('regularChange');
+const discountChangeEl = document.getElementById('discountChange');
+const farePerPassengerEl = document.getElementById('farePerPassenger');
+const regularTotalEl = document.getElementById('regularTotal');
+const discountTotalEl = document.getElementById('discountTotal');
+const paymentShownEl = document.getElementById('paymentShown');
+const summaryEl = document.getElementById('summary');
+const statusEl = document.getElementById('status');
+const paymentButtons = document.querySelectorAll('#paymentButtons .choice-btn');
+const passengerButtons = document.querySelectorAll('#passengerButtons .choice-btn');
+
+const peso = n => `₱${Number(n).toFixed(2)}`;
+
+function selectPayment(value) {
+  paymentEl.value = String(value);
+  paymentButtons.forEach(btn => {
+    btn.classList.toggle('selected', btn.dataset.payment === String(value));
+  });
+  if (getFare() && passengersEl.value !== '') calculate();
+}
+
+function selectPassengers(value) {
+  passengersEl.value = String(value);
+  passengerButtons.forEach(btn => {
+    btn.classList.toggle('selected', btn.dataset.passengers === String(value));
+  });
+  if (getFare() && paymentEl.value !== '') calculate();
+}
+
+paymentButtons.forEach(btn => {
+  btn.addEventListener('click', () => selectPayment(btn.dataset.payment));
+});
+
+passengerButtons.forEach(btn => {
+  btn.addEventListener('click', () => selectPassengers(btn.dataset.passengers));
+});
+
+function routeStops(route) {
+  return stopOrder[route] || Object.keys(fares[route]);
+}
+
+function fillSelect(el, values, placeholder) {
+  el.innerHTML = '';
+  if (placeholder) {
+    const p = document.createElement('option');
+    p.value = '';
+    p.textContent = placeholder;
+    el.appendChild(p);
+  }
+  values.forEach(v => {
+    const o = document.createElement('option');
+    o.value = v;
+    o.textContent = v;
+    el.appendChild(o);
+  });
+}
+
+function populateRoutes() {
+  Object.keys(fares).forEach(route => {
+    const o = document.createElement('option');
+    o.value = route;
+    o.textContent = route;
+    routeEl.appendChild(o);
+  });
+  populateStops();
+}
+
+function populateStops() {
+  const route = routeEl.value;
+  const stops = routeStops(route);
+  fillSelect(fromEl, stops, 'Select origin');
+  fillSelect(toEl, [], 'Select destination');
+  fromEl.disabled = false;
+  toEl.disabled = true;
+  summaryEl.textContent = 'Select your origin and destination, then enter payment and passenger count.';
+  clearStatus();
+}
+
+fromEl.addEventListener('change', () => {
+  const route = routeEl.value;
+  const from = fromEl.value;
+  const destinations = from && fares[route][from]
+    ? routeStops(route).filter(stop => stop !== from && fares[route][from][stop])
+    : [];
+  fillSelect(toEl, destinations, 'Select destination');
+  toEl.disabled = destinations.length === 0;
+  clearStatus();
+});
+
+routeEl.addEventListener('change', populateStops);
+
+function getFare() {
+  const route = routeEl.value;
+  const from = fromEl.value;
+  const to = toEl.value;
+  if (!from || !to) return null;
+  return fares[route]?.[from]?.[to] ?? null;
+}
+
+function clearStatus() {
+  statusEl.className = 'status';
+  statusEl.textContent = '';
+}
+
+function calculate() {
+  const fare = getFare();
+  const payment = Number(paymentEl.value);
+  const passengers = Number(passengersEl.value);
+
+  if (!fare) {
+    statusEl.className = 'status bad';
+    statusEl.textContent = 'Please select a valid origin and destination.';
+    return;
+  }
+  if (!Number.isFinite(payment) || payment < 0) {
+    statusEl.className = 'status bad';
+    statusEl.textContent = 'Please enter a valid payment amount.';
+    return;
+  }
+  if (!Number.isInteger(passengers) || passengers < 1) {
+    statusEl.className = 'status bad';
+    statusEl.textContent = 'Number of passengers must be at least 1.';
+    return;
+  }
+
+  const regularTotal = fare[0] * passengers;
+  const discountTotal = fare[1] * passengers;
+  const regularChange = payment - regularTotal;
+  const discountChange = payment - discountTotal;
+
+  farePerPassengerEl.textContent = `${peso(fare[0])} regular | ${peso(fare[1])} discounted`;
+  regularTotalEl.textContent = peso(regularTotal);
+  discountTotalEl.textContent = peso(discountTotal);
+  paymentShownEl.textContent = peso(payment);
+
+  regularChangeEl.textContent = peso(Math.max(regularChange, 0));
+  discountChangeEl.textContent = peso(Math.max(discountChange, 0));
+
+  summaryEl.innerHTML =
+    `<strong>${routeEl.value}</strong><br>` +
+    `${fromEl.value} → ${toEl.value} • ${passengers} passenger${passengers === 1 ? '' : 's'}<br>` +
+    `Regular fare: ${peso(regularTotal)} • Discounted fare: ${peso(discountTotal)}`;
+
+  if (regularChange < 0 || discountChange < 0) {
+    statusEl.className = 'status bad';
+    const regularDue = Math.max(-regularChange, 0);
+    const discountDue = Math.max(-discountChange, 0);
+    const parts = [];
+    if (regularDue) parts.push(`regular short by ${peso(regularDue)}`);
+    if (discountDue) parts.push(`discounted short by ${peso(discountDue)}`);
+    statusEl.textContent = 'Insufficient payment — ' + parts.join(' • ') + '.';
+  } else {
+    statusEl.className = 'status good';
+    statusEl.textContent = 'Fare calculated successfully.';
+  }
+}
+
+function reset() {
+  routeEl.selectedIndex = 0;
+  populateStops();
+  paymentEl.value = '';
+  passengersEl.value = '1';
+  paymentButtons.forEach(btn => btn.classList.remove('selected'));
+  passengerButtons.forEach(btn => btn.classList.toggle('selected', btn.dataset.passengers === '1'));
+  regularChangeEl.textContent = '₱0.00';
+  discountChangeEl.textContent = '₱0.00';
+  farePerPassengerEl.textContent = '—';
+  regularTotalEl.textContent = '—';
+  discountTotalEl.textContent = '—';
+  paymentShownEl.textContent = '—';
+  summaryEl.textContent = 'Select a route, origin, destination, payment, and passenger count.';
+  clearStatus();
+}
+
+document.getElementById('calculate').addEventListener('click', calculate);
+document.getElementById('reset').addEventListener('click', reset);
+
+// AUTO CALCULATE:
+// Recalculate whenever route, origin, destination, payment, or passenger count changes.
+[routeEl, fromEl, toEl, paymentEl, passengersEl].forEach(el => {
+  el.addEventListener('input', () => {
+    if (getFare() && paymentEl.value !== '' && passengersEl.value !== '') calculate();
+  });
+  el.addEventListener('change', () => {
+    if (getFare() && paymentEl.value !== '' && passengersEl.value !== '') calculate();
+  });
+});
+
+function buildReference() {
+  const container = document.getElementById('reference');
+  Object.entries(fares).forEach(([route, matrix]) => {
+    const box = document.createElement('div');
+    box.className = 'ref-route';
+    const title = document.createElement('div');
+    title.className = 'ref-title';
+    title.textContent = route;
+    const body = document.createElement('div');
+    body.className = 'ref-body';
+
+    const shown = [];
+    const seen = new Set();
+    const orderedStops = routeStops(route);
+    for (const from of orderedStops) {
+      const destinations = matrix[from] || {};
+      for (const to of orderedStops) {
+        if (!destinations[to]) continue;
+        const fare = destinations[to];
+        const key = [from, to].sort().join('||');
+        if (seen.has(key)) continue;
+        seen.add(key);
+        shown.push(`${from} → ${to}: ${peso(fare[0])} / ${peso(fare[1])}`);
+      }
+    }
+    body.textContent = shown.join('  •  ');
+    box.append(title, body);
+    container.appendChild(box);
+  });
+}
+
+populateRoutes();
+buildReference();
+</script>
+</body>
+</html>

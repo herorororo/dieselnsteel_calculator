@@ -66,6 +66,19 @@
   }
   select:focus,input:focus{border-color:var(--yellow);box-shadow:0 0 0 3px rgba(255,196,0,.12)}
   .row{display:grid;grid-template-columns:1fr 1fr;gap:12px}
+  .choice-buttons{display:grid;grid-template-columns:repeat(3,1fr);gap:8px}
+  .choice-buttons.passenger-buttons{grid-template-columns:repeat(5,1fr)}
+  .choice-btn{
+    height:48px;border:2px solid #444;border-radius:11px;
+    background:#202020;color:#fff;font-size:15px;font-weight:900;
+    cursor:pointer;transition:.15s ease;
+  }
+  .choice-btn:hover{transform:translateY(-1px);filter:brightness(1.08)}
+  .choice-btn.selected{border-color:#fff;box-shadow:0 0 0 2px rgba(255,255,255,.18)}
+  .payment-20{background:#f28c28;color:#111;border-color:#f28c28}
+  .payment-50{background:#d93636;color:#fff;border-color:#d93636}
+  .payment-100{background:#7b3fc6;color:#fff;border-color:#7b3fc6}
+  .passenger-btn{background:#333;border-color:#555}
   .actions{display:flex;gap:10px;margin-top:7px}
   button{
     border:0;border-radius:11px;height:48px;padding:0 20px;font-weight:900;
@@ -151,12 +164,24 @@
 
       <div class="row">
         <div class="field">
-          <label for="payment">Payment (₱)</label>
-          <input id="payment" type="number" min="0" step="1" placeholder="100">
+          <label>Payment (₱)</label>
+          <div class="choice-buttons" id="paymentButtons">
+            <button type="button" class="choice-btn payment-20" data-payment="20">₱20</button>
+            <button type="button" class="choice-btn payment-50" data-payment="50">₱50</button>
+            <button type="button" class="choice-btn payment-100" data-payment="100">₱100</button>
+          </div>
+          <input id="payment" type="hidden" value="">
         </div>
         <div class="field">
-          <label for="passengers">Passengers</label>
-          <input id="passengers" type="number" min="1" step="1" value="1">
+          <label>Passengers</label>
+          <div class="choice-buttons passenger-buttons" id="passengerButtons">
+            <button type="button" class="choice-btn passenger-btn selected" data-passengers="1">1</button>
+            <button type="button" class="choice-btn passenger-btn" data-passengers="2">2</button>
+            <button type="button" class="choice-btn passenger-btn" data-passengers="3">3</button>
+            <button type="button" class="choice-btn passenger-btn" data-passengers="4">4</button>
+            <button type="button" class="choice-btn passenger-btn" data-passengers="5">5</button>
+          </div>
+          <input id="passengers" type="hidden" value="1">
         </div>
       </div>
 
@@ -199,94 +224,43 @@
     </section>
   </main>
 
-  <footer>Diesel N Steel Fare Calculator • BY YEONGIII</footer>
+  <footer>Diesel N Steel Fare Calculator • Data based on the supplied Diesel N Steel fare tables • fares work both ways • dropdowns follow the supplied route order.</footer>
 </div>
 
 <script>
-// Fare table. Each route lists its stops in travel order and prices only the
-// upper triangle: a stop is priced against the stops that come after it.
-// A fare is the same both ways, so the reverse half of the matrix is mirrored
-// in automatically further down. Prices are [regular, discounted] in pesos.
-const routeData = {
-  "Malolos Line": {
-    stops: ["STO ROSARIO/SAN JUAN", "ATLAG", "BAGNA", "PANASAHAN", "MATIMBO", "MAMBOG", "PITPITAN", "SAN NICOLAS", "MAYSANTOL", "SAN JOSE"],
-    fareTable: {
-      
-      "STO ROSARIO/SAN JUAN": {"SAN JOSE": [26, 22]},
-      "ATLAG": {"STO ROSARIO/SAN JUAN": [24, 22], "SAN JOSE": [24, 22]},
-      "BAGNA": {"ATLAG": [14, 12], "STO ROSARIO/SAN JUAN": [22, 20], "SAN JOSE": [22, 20]},
-      "PANASAHAN": {"BAGNA": [14, 12], "ATLAG": [14, 12], "STO ROSARIO/SAN JUAN": [20, 18], "SAN JOSE": [20, 18]},
-      "MATIMBO": {"PANASAHAN": [14, 12], "BAGNA": [14, 12], "ATLAG": [14, 12], "STO ROSARIO/SAN JUAN": [16, 14], "SAN JOSE": [18, 16]},
-      "MAMBOG": {"MATIMBO": [14, 12], "PANASAHAN": [14, 12], "BAGNA": [14, 12], "ATLAG": [16, 14], "STO ROSARIO/SAN JUAN": [18, 16], "SAN JOSE": [16, 14]},
-      "PITPITAN": {"MAMBOG": [14, 12], "MATIMBO": [14, 12], "PANASAHAN": [14, 12], "BAGNA": [16, 14], "ATLAG": [18, 16], "STO ROSARIO/SAN JUAN": [20, 18], "SAN JOSE": [14, 12]},
-      "SAN NICOLAS": {"PITPITAN": [14, 12], "MAMBOG": [14, 12], "MATIMBO": [14, 12], "PANASAHAN": [16, 14], "BAGNA": [18, 16], "ATLAG": [20, 18], "STO ROSARIO/SAN JUAN": [22, 20], "SAN JOSE": [14, 12]},
-      "MAYSANTOL": {"SAN NICOLAS": [14, 12], "PITPITAN": [14, 12], "MAMBOG": [14, 12], "MATIMBO": [16, 14], "PANASAHAN": [18, 16], "BAGNA": [20, 18], "ATLAG": [22, 20], "STO ROSARIO/SAN JUAN": [24, 22], "SAN JOSE": [14, 12]},
-      "SAN JOSE": {}
-    }
-  },
-  "Balagtas Line": {
-    stops: ["PANGINAY", "MATUNGAO", "WAWA", "BAGUMBAYAN / SN JOSE", "SN JOSE"],
-    fareTable: {
-      "PANGINAY": {"MATUNGAO": [14, 12], "WAWA": [14, 12], "BAGUMBAYAN / SN JOSE": [14, 12], "SN JOSE": [14, 12]},
-      "MATUNGAO": {"WAWA": [14, 12], "BAGUMBAYAN / SN JOSE": [14, 12], "SN JOSE": [14, 12]},
-      "WAWA": {"BAGUMBAYAN / SN JOSE": [16, 14], "SN JOSE": [16, 14]},
-      "BAGUMBAYAN / SN JOSE": {},
-      "SN JOSE": {}
-    }
-  },
-  "Guiguinto Line": {
-    stops: ["TUKTUKAN CRUZ", "MATUNGAO", "BAYAN", "BAGUMBAYAN / SN JOSE", "GUIGUINTO", "SN JOSE"],
-    fareTable: {
-      "TUKTUKAN CRUZ": {"MATUNGAO": [14, 12], "GUIGUINTO": [14, 12], "SN JOSE": [14, 12]},
-      "MATUNGAO": {"BAYAN": [14, 12], "BAGUMBAYAN / SN JOSE": [14, 12], "GUIGUINTO": [14, 12], "SN JOSE": [14, 12]},
-      "BAYAN": {"SN JOSE": [14, 12]},
-      "BAGUMBAYAN / SN JOSE": {"GUIGUINTO": [14, 12]},
-      "GUIGUINTO": {},
-      "SN JOSE": {}
-    }
-  }
-};
-
-// FIXED: Build the fare matrix from EVERY fareTable entry.
-// The supplied fare table is not consistently stored as an upper triangle:
-// some rows contain fares to earlier stops. We therefore read every listed
-// pair and mirror it, making both directions work (A -> B and B -> A).
-const fares = {};
-
-Object.entries(routeData).forEach(([route, def]) => {
-  const matrix = fares[route] = {};
-
-  // Create every stop as a selectable origin.
-  def.stops.forEach(stop => {
-    matrix[stop] = {};
-  });
-
-  // Read every explicitly supplied fare pair.
-  Object.entries(def.fareTable).forEach(([from, destinations]) => {
-    if (!matrix[from]) matrix[from] = {};
-
-    Object.entries(destinations).forEach(([rawTo, fare]) => {
-      // Handle minor spelling/abbreviation differences in the supplied table.
-      const aliases = {
-        "SN JOSE": "SAN JOSE",
-        "AT LAG": "ATLAG"
-      };
-      const to = aliases[rawTo] || rawTo;
-
-      if (!matrix[to]) matrix[to] = {};
-
-      // Store both directions.
-      matrix[from][to] = fare;
-      matrix[to][from] = fare;
-    });
-  });
-});
+const fares = {"Malolos Line": {"MAYSANTOL": {"SN JOSE": [14, 12], "SN NICOLAS": [14, 12], "PITPITAN": [14, 12], "MAMBOG": [14, 12], "MATIMBO": [16, 14], "PANASAHAN": [18, 16], "BAGNA": [20, 18], "AT LAG": [22, 20], "STO ROSARIO (MALOLOS)/SAN JUAN": [24, 22]}, "SN NICOLAS": {"SN JOSE": [14, 12], "MAYSANTOL": [14, 12], "PITPITAN": [14, 12], "MAMBOG": [14, 12], "MATIMBO": [14, 12], "PANASAHAN": [16, 14], "BAGNA": [18, 16], "AT LAG": [20, 18], "STO ROSARIO (MALOLOS)/SAN JUAN": [22, 20]}, "PITPITAN": {"SN JOSE": [14, 12], "MAYSANTOL": [14, 12], "SN NICOLAS": [14, 12], "MAMBOG": [14, 12], "MATIMBO": [14, 12], "PANASAHAN": [14, 12], "BAGNA": [16, 14], "AT LAG": [18, 16], "STO ROSARIO (MALOLOS)/SAN JUAN": [20, 18]}, "MAMBOG": {"SN JOSE": [16, 14], "MAYSANTOL": [14, 12], "SN NICOLAS": [14, 12], "PITPITAN": [14, 12], "MATIMBO": [14, 12], "PANASAHAN": [14, 12], "BAGNA": [14, 12], "AT LAG": [16, 14], "STO ROSARIO (MALOLOS)/SAN JUAN": [18, 16]}, "MATIMBO": {"SN JOSE": [18, 16], "MAYSANTOL": [16, 14], "SN NICOLAS": [14, 12], "PITPITAN": [14, 12], "MAMBOG": [14, 12], "PANASAHAN": [14, 12], "BAGNA": [14, 12], "AT LAG": [14, 12], "STO ROSARIO (MALOLOS)/SAN JUAN": [16, 14]}, "PANASAHAN": {"SN JOSE": [20, 18], "MAYSANTOL": [18, 16], "SN NICOLAS": [16, 14], "PITPITAN": [14, 12], "MAMBOG": [14, 12], "MATIMBO": [14, 12], "BAGNA": [14, 12], "AT LAG": [14, 12], "STO ROSARIO (MALOLOS)/SAN JUAN": [20, 18]}, "BAGNA": {"SN JOSE": [22, 20], "MAYSANTOL": [20, 18], "SN NICOLAS": [18, 16], "PITPITAN": [16, 14], "MAMBOG": [14, 12], "MATIMBO": [14, 12], "PANASAHAN": [14, 12], "AT LAG": [14, 12], "STO ROSARIO (MALOLOS)/SAN JUAN": [22, 20]}, "AT LAG": {"SN JOSE": [24, 22], "MAYSANTOL": [22, 20], "SN NICOLAS": [20, 18], "PITPITAN": [18, 16], "MAMBOG": [16, 14], "MATIMBO": [14, 12], "PANASAHAN": [14, 12], "BAGNA": [14, 12], "STO ROSARIO (MALOLOS)/SAN JUAN": [24, 22]}, "STO ROSARIO (MALOLOS)/SAN JUAN": {"SN JOSE": [26, 22], "MAYSANTOL": [24, 22], "SN NICOLAS": [22, 20], "PITPITAN": [20, 18], "MAMBOG": [18, 16], "MATIMBO": [16, 14], "PANASAHAN": [20, 18], "BAGNA": [22, 20], "AT LAG": [24, 22]}, "SN JOSE": {"STO ROSARIO (MALOLOS)/SAN JUAN": [26, 22], "MAYSANTOL": [14, 12], "SN NICOLAS": [14, 12], "PITPITAN": [14, 12], "MAMBOG": [16, 14], "MATIMBO": [18, 16], "PANASAHAN": [20, 18], "BAGNA": [22, 20], "AT LAG": [24, 22]}}, "Bulakan → Balagtas Line": {"PANGINAY": {"WAWA": [14, 12], "MATUNGAO": [14, 12], "BAGUMBAYAN / SN JOSE": [14, 12], "SN JOSE": [14, 12]}, "MATUNGAO": {"SN JOSE": [14, 12], "PANGINAY": [14, 12], "WAWA": [14, 12], "BAGUMBAYAN / SN JOSE": [14, 12]}, "WAWA": {"SN JOSE": [16, 14], "MATUNGAO": [14, 12], "PANGINAY": [14, 12], "BAGUMBAYAN / SN JOSE": [16, 14]}, "BAGUMBAYAN / SN JOSE": {"WAWA": [16, 14], "PANGINAY": [14, 12], "MATUNGAO": [14, 12]}, "SN JOSE": {"MATUNGAO": [14, 12], "PANGINAY": [14, 12], "WAWA": [16, 14]}}, "Guiguinto Line": {"TUKTUKAN CRUZ": {"GUIGUINTO": [14, 12], "MATUNGAO": [14, 12], "SN JOSE": [14, 12]}, "MATUNGAO": {"GUIGUINTO": [14, 12], "SN JOSE": [14, 12], "TUKTUKAN CRUZ": [14, 12], "BAYAN": [14, 12], "BAGUMBAYAN / SN JOSE": [14, 12]}, "BAYAN": {"SN JOSE": [14, 12], "MATUNGAO": [14, 12]}, "BAGUMBAYAN / SN JOSE": {"GUIGUINTO": [14, 12], "MATUNGAO": [14, 12]}, "GUIGUINTO": {"TUKTUKAN CRUZ": [14, 12], "MATUNGAO": [14, 12], "BAGUMBAYAN / SN JOSE": [14, 12]}, "SN JOSE": {"MATUNGAO": [14, 12], "TUKTUKAN CRUZ": [14, 12], "BAYAN": [14, 12]}}};
 
 const routeEl = document.getElementById('route');
 const fromEl = document.getElementById('from');
 const toEl = document.getElementById('to');
 const paymentEl = document.getElementById('payment');
 const passengersEl = document.getElementById('passengers');
+
+// Stop order follows the supplied Diesel N Steel route boards.
+// This order is used consistently for both From and To dropdowns.
+const stopOrder = {
+  "Malolos Line": [
+    "MAYSANTOL",
+    "SN NICOLAS",
+    "PITPITAN",
+    "MAMBOG",
+    "MATIMBO",
+    "PANASAHAN",
+    "BAGNA",
+    "AT LAG",
+    "STO ROSARIO (MALOLOS)/SAN JUAN"
+  ],
+  "Bulakan → Balagtas Line": [
+    "MATUNGAO",
+    "PANGINAY",
+    "WAWA"
+  ],
+  "Guiguinto Line": [
+    "MATUNGAO",
+    "TUKTUKAN CRUZ",
+    "BAYAN"
+  ]
+};
 
 const regularChangeEl = document.getElementById('regularChange');
 const discountChangeEl = document.getElementById('discountChange');
@@ -296,11 +270,37 @@ const discountTotalEl = document.getElementById('discountTotal');
 const paymentShownEl = document.getElementById('paymentShown');
 const summaryEl = document.getElementById('summary');
 const statusEl = document.getElementById('status');
+const paymentButtons = document.querySelectorAll('#paymentButtons .choice-btn');
+const passengerButtons = document.querySelectorAll('#passengerButtons .choice-btn');
 
 const peso = n => `₱${Number(n).toFixed(2)}`;
 
+function selectPayment(value) {
+  paymentEl.value = String(value);
+  paymentButtons.forEach(btn => {
+    btn.classList.toggle('selected', btn.dataset.payment === String(value));
+  });
+  if (getFare() && passengersEl.value !== '') calculate();
+}
+
+function selectPassengers(value) {
+  passengersEl.value = String(value);
+  passengerButtons.forEach(btn => {
+    btn.classList.toggle('selected', btn.dataset.passengers === String(value));
+  });
+  if (getFare() && paymentEl.value !== '') calculate();
+}
+
+paymentButtons.forEach(btn => {
+  btn.addEventListener('click', () => selectPayment(btn.dataset.payment));
+});
+
+passengerButtons.forEach(btn => {
+  btn.addEventListener('click', () => selectPassengers(btn.dataset.passengers));
+});
+
 function routeStops(route) {
-  return Object.keys(fares[route]);
+  return stopOrder[route] || Object.keys(fares[route]);
 }
 
 function fillSelect(el, values, placeholder) {
@@ -343,7 +343,9 @@ function populateStops() {
 fromEl.addEventListener('change', () => {
   const route = routeEl.value;
   const from = fromEl.value;
-  const destinations = from && fares[route][from] ? Object.keys(fares[route][from]) : [];
+  const destinations = from && fares[route][from]
+    ? routeStops(route).filter(stop => stop !== from && fares[route][from][stop])
+    : [];
   fillSelect(toEl, destinations, 'Select destination');
   toEl.disabled = destinations.length === 0;
   clearStatus();
@@ -422,6 +424,8 @@ function reset() {
   populateStops();
   paymentEl.value = '';
   passengersEl.value = '1';
+  paymentButtons.forEach(btn => btn.classList.remove('selected'));
+  passengerButtons.forEach(btn => btn.classList.toggle('selected', btn.dataset.passengers === '1'));
   regularChangeEl.textContent = '₱0.00';
   discountChangeEl.textContent = '₱0.00';
   farePerPassengerEl.textContent = '—';
@@ -446,12 +450,6 @@ document.getElementById('reset').addEventListener('click', reset);
   });
 });
 
-[paymentEl, passengersEl].forEach(el => {
-  el.addEventListener('keydown', e => {
-    if (e.key === 'Enter') calculate();
-  });
-});
-
 function buildReference() {
   const container = document.getElementById('reference');
   Object.entries(fares).forEach(([route, matrix]) => {
@@ -465,8 +463,12 @@ function buildReference() {
 
     const shown = [];
     const seen = new Set();
-    for (const [from, destinations] of Object.entries(matrix)) {
-      for (const [to, fare] of Object.entries(destinations)) {
+    const orderedStops = routeStops(route);
+    for (const from of orderedStops) {
+      const destinations = matrix[from] || {};
+      for (const to of orderedStops) {
+        if (!destinations[to]) continue;
+        const fare = destinations[to];
         const key = [from, to].sort().join('||');
         if (seen.has(key)) continue;
         seen.add(key);
